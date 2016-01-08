@@ -30,25 +30,32 @@
         <title>ello World</title>
         <style type="text/css">
             .draggable {
-                position: absolute;
-                left: 30px;
-                top: 30px;
-                width: 60px;
-                height: 60px;
-                margin-left: -30px;
-                margin-top: -30px;
+                width: 100px;
+                height: 100px;
 
-                color: #FFF;
-                font: bold 16px Helvetica,Arial,Sans-serif;
-                text-align: center;
-                background-color: #ABF;
-                border: 3px solid #669;
             }
         </style>
     </head>
     <body>
         <div class="app">
-            <div class="draggable" id="drag1" >Drag 1!</div>
+            <div class="draggable" id="drag1" >
+                <img src="res/screen/android/head.png" style="width: 100px">
+            </div>
+            <div class="draggable" id="drag2" >
+                <img src="res/screen/android/body.png" style="width: 100px">
+            </div>
+            <div class="draggable" id="drag3" >
+                <img src="res/screen/android/left_boot.png" style="width: 100px">
+            </div>
+            <div class="draggable" id="drag4" >
+                <img src="res/screen/android/right_boot.png" style="width: 100px">
+            </div>
+            <div class="draggable" id="drag5" >
+                <img src="res/screen/android/left_arm.png" style="width: 100px">
+            </div>
+            <div class="draggable" id="drag6" >
+                <img src="res/screen/android/right_arm.png" style="width: 100px">
+            </div>
         </div>
 
         <script type="text/javascript" src="cordova.js"></script>
@@ -60,7 +67,7 @@
         <script type="text/javascript" src="js/jquery/js/jquery.ui.touch-punch.js"></script>
         <script type="text/javascript" src="js/main.js"></script>
         <script type="text/javascript">
-$('#drag1').draggable();
+$('.draggable').draggable();
         </script>
         <script type="text/javascript">
             app.initialize();
