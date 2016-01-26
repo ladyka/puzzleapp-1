@@ -27,50 +27,23 @@
         <!-- WARNING: for iOS 7, remove the width=device-width and height=device-height attributes. See https://issues.apache.org/jira/browse/CB-4323 -->
         <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height, target-densitydpi=device-dpi" />
         <link rel="stylesheet" type="text/css" href="css/index.css" />
-        <title>ello World</title>
-        <style type="text/css">
-            .draggable {
-                width: 100px;
-                height: 100px;
-
-            }
-        </style>
+        <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jquerymobile/1.4.5/jquery.mobile.min.css">
+        <script src="js/page.js"></script>
+        <script type="text/javascript" src="js/index.js"></script>
     </head>
     <body>
-        <div class="app">
-            <div class="draggable" id="drag1" >
-                <img src="res/screen/android/head.png" style="width: 100px">
-            </div>
-            <div class="draggable" id="drag2" >
-                <img src="res/screen/android/body.png" style="width: 100px">
-            </div>
-            <div class="draggable" id="drag3" >
-                <img src="res/screen/android/left_boot.png" style="width: 100px">
-            </div>
-            <div class="draggable" id="drag4" >
-                <img src="res/screen/android/right_boot.png" style="width: 100px">
-            </div>
-            <div class="draggable" id="drag5" >
-                <img src="res/screen/android/left_arm.png" style="width: 100px">
-            </div>
-            <div class="draggable" id="drag6" >
-                <img src="res/screen/android/right_arm.png" style="width: 100px">
-            </div>
-        </div>
+    <div class="app" id="sector">
 
-        <script type="text/javascript" src="cordova.js"></script>
-        <script type="text/javascript" src="js/index.js"></script>
-        <script type="text/javascript" src="js/jquery/js/jquery-1.8.3.js"></script>
-        <script type="text/javascript" src="js/jquery/js/jquery-ui-1.9.2.custom.js"></script>
-        <script type="text/javascript" src="js/jquery/development-bundle/ui/jquery.ui.mouse.js"></script>
-        <script type="text/javascript" src="js/jquery/development-bundle/ui/jquery.ui.widget.js"></script>
-        <script type="text/javascript" src="js/jquery/js/jquery.ui.touch-punch.js"></script>
-        <script type="text/javascript" src="js/main.js"></script>
-        <script type="text/javascript">
-$('.draggable').draggable();
-        </script>
-        <script type="text/javascript">
-            app.initialize();
-        </script>
+    </div>
+
+    <script type="text/javascript" src="cordova.js"></script>
+    <script type="text/javascript" src="js/jquery/js/jquery-1.8.3.js"></script>
+    <script type="text/javascript" src="js/jquery/js/jquery-ui-1.9.2.custom.js"></script>
+    <script type="text/javascript" src="js/jquery/development-bundle/ui/jquery.ui.mouse.js"></script>
+    <script type="text/javascript" src="js/jquery/development-bundle/ui/jquery.ui.widget.js"></script>
+    <script type="text/javascript" src="js/jquery/js/jquery.ui.touch-punch.js"></script>
+    <script type="text/javascript">
+        app.initialize();
+    </script>
     </body>
 </html>
