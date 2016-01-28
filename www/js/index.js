@@ -33,9 +33,20 @@ var app = {
     // The scope of 'this' is the event. In order to call the 'receivedEvent'
     // function, we must explicitly call 'app.receivedEvent(...);'
     onDeviceReady: function () {
+        var jTransfer = new FileTransfer();
+        jTransfer.download('http://pastebin.com/raw/cKPcFcpJ', cordova.file.dataDirectory + 'levels.json',
+            function (entry) {
+                var s = entry.nativeURL;
+                alert('json загружен');
+            },
+            function (error) {
+                alert('json лох, код ошибки:  ' + error.code);
+            },
+            true
+        );
         page.base('');
         page('/index', index);
-        page('/play', play);
+        page('/play/:id', play);
         page();
         page.redirect('/index');
 
@@ -48,35 +59,28 @@ var app = {
 // match any of the following routes
 //
 function index() {
-    var fileTransfer = new FileTransfer();
     var sector = document.getElementById('sector');
-    fileTransfer.download('http://freepacman.ru/images/play-game.png', cordova.file.cacheDirectory + 'start.png',
-        function (entry) {
-            var s = entry.nativeURL;
-            alert('картинка загружена, она теперь должна быть на кнопке');
-            sector.innerHTML = '<div id="start-button"><a href="/play"><img src="' + s.substr(8) + '"></a></div>';
-
-        },
-        function (error) {
-            alert('картинка не загрузилась, на кнопке обычный текст (можно взять из кэша)\nКод ошибки:  ' + error.code);
-            sector.innerHTML = '<div id="start-button"><a href="/play"><h1>Играть</h1></a></div>';
-        },
-        true
-    );
-
-
-    var jTransfer = new FileTransfer();
-    jTransfer.download('http://pastebin.com/raw/cKPcFcpJ', cordova.file.dataDirectory + 'levels.json',
-        function (entry) {
-            var s = entry.nativeURL;
-            alert('json загружен');
-        },
-        function (error) {
-            alert('json лох, код ошибки:  ' + error.code);
-        },
-        true
-    );
+    sector.innerHTML = '';
+    for(var i = 0; i<2; i++) {
+        sector.innerHTML += '<div id="start-button"><a href="/play/' + i + '">Уровень '+i+'</a></div>';
+    }
     /*
+     var fileTransfer = new FileTransfer();
+     fileTransfer.download('http://freepacman.ru/images/play-game.png', cordova.file.cacheDirectory + 'start.png',
+     function (entry) {
+     var s = entry.nativeURL;
+     alert('картинка загружена, она теперь должна быть на кнопке');
+     sector.innerHTML = '<div id="start-button"><a href="/play"><img src="' + s.substr(8) + '"></a></div>';
+
+     },
+     function (error) {
+     alert('картинка не загрузилась, на кнопке обычный текст (можно взять из кэша)\nКод ошибки:  ' + error.code);
+     sector.innerHTML = '<div id="start-button"><a href="/play"><h1>Играть</h1></a></div>';
+     },
+     true
+     );
+
+     /*
      window.resolveLocalFileSystemURL(cordova.file.dataDirectory, function(dir) {
      dir.getFile("levels.json", {create:true}, function(file) {
      file.createWriter( function(fileWriter) {
@@ -91,7 +95,12 @@ function index() {
 
 }
 
-function play() {
+function play(ctx) {
+
+    var lid = parseInt(ctx.params.id);
+    var done = 0;
+
+
     var sector = document.getElementById('sector');
     sector.innerHTML = '';
 
@@ -112,9 +121,11 @@ function play() {
     );
 
     function parseLevel(lv) {
+
+
         if (lv) {
-            sector.innerHTML += '<div class="parts" id="main" ><img src="' + lv[0].main.ref + '" ></div>';
-            lv[0].parts.forEach(function (element) {
+            sector.innerHTML += '<div class="parts" id="main" ><img src="' + lv[lid].main.ref + '" ></div>';
+            lv[lid].parts.forEach(function (element) {
                 sector.innerHTML += '<div class="draggable parts" id="' + element.id + '" ><img src="' + element.ref + '" ></div>';
             });
 
@@ -138,7 +149,7 @@ function play() {
                 $('.draggable').draggable();
 
 
-                lv[0].parts.forEach(function (element) {
+                lv[lid].parts.forEach(function (element) {
                     $('#'+element.id).on('mouseup', function(e){
                         var x = santax + (element.x / window.devicePixelRatio);
                         var y = santay + (element.y / window.devicePixelRatio);
@@ -148,7 +159,7 @@ function play() {
                             $('#'+element.id).css('left', x);
                             $('#'+element.id).off('mouseup');
                             $('#'+element.id).draggable('destroy');
-                            check();
+                            check(lv[lid].parts.length);
                         }
                     })
                 });
@@ -157,20 +168,19 @@ function play() {
         }
         else alert('объект уровня null, что-то случилось при чтении файла');
     }
-}
+    function check(n) {
+        done++;
+        if (done == n) {
+            done = 0;
+            $('<div id="win">Уровень пройден!<p><a href="/index" >Вернуться в главное меню</a></p></div>')
+                .appendTo('#sector');
+            var win = document.getElementById('win');
+            var winh = win.offsetHeight;
+            var winw = win.offsetWidth;
+            win.setAttribute('style', 'display: block;position:absolute; z-index:111; top:' + ((screen.height / 2) - winh / 2) + 'px' +
+                '; left:' + ((screen.width / 2) - winw / 2) + 'px');
+        }
 
-var done = 0;
-
-function check() {
-    done++;
-    if (done == 6) {
-        done = 0;
-        $('<div id="win">Уровень пройден!<p><a href="/index" >Вернуться в главное меню</a></p></div>')
-            .appendTo('#sector');
-        var win = document.getElementById('win');
-        var winh = win.offsetHeight;
-        var winw = win.offsetWidth;
-        win.setAttribute('style', 'display: block;position:absolute; z-index:111; top:' + ((screen.height / 2) - winh / 2) + 'px' +
-            '; left:' + ((screen.width / 2) - winw / 2) + 'px');
     }
+
 }
