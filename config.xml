@@ -1,11 +1,11 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget id="com.phonegap.helloworld" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:gap="http://phonegap.com/ns/1.0">
-    <name>Hello World</name>
+<widget id="by.havefun.puzzleapp" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:gap="http://phonegap.com/ns/1.0">
+    <name>Puzzle app</name>
     <description>
-        Hello World sample application that responds to the deviceready event.
+	First PhoneGap application
     </description>
-    <author email="support@phonegap.com" href="http://phonegap.com">
-        PhoneGap Team
+    <author email="andrei@ladyka.tk" href="http://havefun.by">
+        Ashot and Andrei
     </author>
     <content src="index.html" />
     <preference name="permissions" value="none" />
@@ -54,7 +54,7 @@
     <platform name="android">
         <preference name="AndroidExtraFilesystems" value="files,files-external,documents,sdcard,cache,cache-external,root" />
         <icon src="www/icon.png" />
-        <splash src="www/res/screen/android/.png"/>
+        <splash src="www/res/screen/android/splash.png"/>
 
         <allow-intent href="market:*" />
     </platform>
