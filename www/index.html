@@ -32,17 +32,20 @@
         <script type="text/javascript" src="js/index.js"></script>
     </head>
     <body>
-    <div class="app" id="sector">
+    <div id="start-button"><a href="/index">main</a></div>
+    <div id="start-button" onclick="ImgCache.clearCache(function(){alert('cleared')},function(){alert('not')})">kk</div>
+    <div class="app" id="app_section">
 
     </div>
 
-    <script type="text/javascript" src="cordova.js"></script>
-    <script type="text/javascript" src="js/jquery/js/jquery-1.8.3.js"></script>
-    <script type="text/javascript" src="js/jquery/js/jquery-ui-1.9.2.custom.js"></script>
-    <script type="text/javascript" src="js/jquery/development-bundle/ui/jquery.ui.mouse.js"></script>
-    <script type="text/javascript" src="js/jquery/development-bundle/ui/jquery.ui.widget.js"></script>
-    <script type="text/javascript" src="js/jquery/js/jquery.ui.touch-punch.js"></script>
-    <script type="text/javascript">
+    <script src="cordova.js"></script>
+    <script src="js/jquery/jquery-1.8.3.js"></script>
+    <script src="js/imgcache.js"></script>
+    <script src="js/jquery/js/jquery-ui-1.9.2.custom.js"></script>
+    <script src="js/jquery/development-bundle/ui/jquery.ui.mouse.js"></script>
+    <script src="js/jquery/development-bundle/ui/jquery.ui.widget.js"></script>
+    <script src="js/jquery/js/jquery.ui.touch-punch.js"></script>
+    <script>
         app.initialize();
     </script>
     </body>
