@@ -20,6 +20,7 @@ var app = {
     // Application Constructor
     initialize: function () {
         this.bindEvents();
+
     },
     // Bind Event Listeners
     //
@@ -34,74 +35,100 @@ var app = {
     // function, we must explicitly call 'app.receivedEvent(...);'
     onDeviceReady: function () {
         ImgCache.init();
-        window.resolveLocalFileSystemURL(cordova.file.dataDirectory+'levels.json', function(){alert('данные загружены')},function(){
-            var jTransfer = new FileTransfer();
-            jTransfer.download('http://pastebin.com/raw/cKPcFcpJ', cordova.file.dataDirectory + 'levels.json',
-                function (entry) {
-                    var s = entry.nativeURL;
-                    alert('данные загружены');
-
-                    window.resolveLocalFileSystemURL(cordova.file.dataDirectory + 'levels.json',
-                        function (fileEntry) {
-                            fileEntry.file(function (file) {
-                                var reader = new FileReader();
-                                reader.onloadend = function (e) {
-
-                                    var level = JSON.parse(this.result);
-                                    //if (level) { alert('объект уровня null, что-то случилось при чтении файла'); page('/index');}
-
-                                    level.forEach(function(element,index) {
-                                        alert('index: '+index+', id: '+element.id);
-                                        element.parts.forEach(function(element) {
-                                            ImgCache.isCached(element.ref, function (path, success) {
-                                                if (success) {
-                                                    console.log('already cached')
-                                                }
-                                                else {
-                                                    ImgCache.cacheFile(element.ref,
-                                                        function () {
-                                                            console.log('cached');
-                                                        },
-                                                        function () {
-                                                            console.log('cache problem');
-                                                        }
-                                                    );
-                                                }
-                                            });
-                                        })
-                                    });
-                                };
-                                reader.readAsText(file);
-                            })
-                        },
-                        function (e) {
-                            alert("ошибка файловой системы: " + e);
-                            page('/index');
-                        }
-                    );
-                },
-                function (error) {
-                    alert('данные не загрузились, дальнейшая работа невозможна, код ошибки:  ' + error.code);
-                },
-                true
-            );
-        });
-
 
         page.base('');
         page('/index', index);
         page('/play/:id', play);
         page();
-        page.redirect('/index');
+        document.getElementById('app_section').innerHTML = '' +
+            '<div id="splash"><img src="img/splash.png"></div>' +
+            '<div class="spinner">' +
+            '<div class="bounce1"></div>' +
+            '<div class="bounce2"></div>' +
+            '<div class="bounce3"></div></div>' +
+            '<div id="progress_dialog"></div>';
 
+
+        var progress_dialog = $('#progress_dialog');
+
+        window.resolveLocalFileSystemURL(cordova.file.cacheDirectory+'levels.json',
+            function (fileEntry) {
+                cache_levels(fileEntry,progress_dialog);
+            },
+            function(){
+                var jTransfer = new FileTransfer();
+                jTransfer.download('http://pastebin.com/raw/cKPcFcpJ', cordova.file.cacheDirectory + 'levels.json',
+                    function (entry) {
+                        cache_levels(entry,progress_dialog);
+                    },
+                    function (error) {
+                        progress_dialog.text('JSON не загружен, проверьте подключение к Интернету и перезапустите приложение');
+                    },
+                    true
+                );
+            }
+        );
+        //page.redirect('/index');
+        function cache_levels(entry,progress_dialog){
+            //var s = entry.nativeURL;
+            progress_dialog.text('JSON загружен');
+            entry.file(function (file) {
+                var reader = new FileReader();
+                reader.onloadend = function (e) {
+
+                    var levels = JSON.parse(this.result);
+                    //if (level) { alert('объект уровня null, что-то случилось при чтении файла'); page('/index');}
+                    var progress = 0;
+                    var all_parts = 0;
+                    levels.forEach(function(element,index){
+                        all_parts += element.parts.length;
+                    });
+                    var interval = 100/all_parts;
+                    levels.forEach(function(element,index) {
+                        element.parts.forEach(function(element,index) {
+                            var i2 = index;
+                            ImgCache.isCached(element.ref, function (path, success) {
+                                if (success) {
+                                    console.log('already cached');
+                                    progress += interval;
+                                    progress_dialog.text('Загрузка кэша '+parseInt(progress)+'%');
+                                    if(parseInt(progress) == 100){
+                                        document.getElementById('app_section').innerHTML = '' +
+                                            '<div id="splash"><img src="img/splash.png"></div>' +
+                                            '<div id="start-button"><a href="/index">Играть</a></div>';
+                                    }
+                                }
+                                else {
+                                    ImgCache.cacheFile(element.ref,
+                                        function () {
+                                            console.log('cached');
+                                            progress += interval;
+                                            progress_dialog.text('Загрузка кэша '+parseInt(progress)+'%');
+                                            if(parseInt(progress) ==100){
+                                                document.getElementById('app_section').innerHTML = '' +
+                                                    '<div id="splash"><img src="img/splash.png"></div>' +
+                                                    '<div id="start-button"><a href="/index">Играть</a></div>';
+                                            }
+                                        },
+                                        function () {
+                                            console.log('cache problem');
+                                            alert('Возникла проблема при кэшировании, провертье подключение к Интернету и перезапустите приложение');
+                                            return;
+                                        }
+                                    );
+                                }
+                            });
+                        });
+
+                    });
+                };
+                reader.readAsText(file);
+            });
+        }
     }
 };
-// the "notfound" implements a catch-all
-// with page('*', notfound). Here we have
-// no catch-all, so page.js will redirect
-// to the location of paths which do not
-// match any of the following routes
-//
+
+
 function index() {
     /*
      var db = openDatabase('Levels','1.0','Levels',10000);
@@ -124,22 +151,22 @@ function index() {
     for(var i = 0; i<2; i++) {
         app_section.innerHTML += '<div id="start-button"><a href="/play/' + i + '">Уровень '+i+'</a></div>';
     }
-/*
-    var fileTransfer = new FileTransfer();
-    fileTransfer.download('http://freepacman.ru/images/play-game.png', cordova.file.cacheDirectory + 'start.png',
-        function (entry) {
-            var s = entry.nativeURL;
-            app_section.innerHTML += '<img src="' + s.substr(8) + '">';
+    /*
+     var fileTransfer = new FileTransfer();
+     fileTransfer.download('http://freepacman.ru/images/play-game.png', cordova.file.cacheDirectory + 'start.png',
+     function (entry) {
+     var s = entry.nativeURL;
+     app_section.innerHTML += '<img src="' + s.substr(8) + '">';
 
-        },
-        function (error) {
-            alert('картинка не загрузилась, на кнопке обычный текст (можно взять из кэша)\nКод ошибки:  ' + error.code);
-            //app_section.innerHTML = '<div id="start-button"><a href="/play"><h1>Играть</h1></a></div>';
-        },
-        true
-    );
+     },
+     function (error) {
+     alert('картинка не загрузилась, на кнопке обычный текст (можно взять из кэша)\nКод ошибки:  ' + error.code);
+     //app_section.innerHTML = '<div id="start-button"><a href="/play"><h1>Играть</h1></a></div>';
+     },
+     true
+     );
 
-    window.resolveLocalFileSystemURL(cordova.file.dataDirectory, function(dir) {
+     window.resolveLocalFileSystemURL(cordova.file.dataDirectory, function(dir) {
      dir.getFile("levels.json", {create:true}, function(file) {
      file.createWriter( function(fileWriter) {
      //fileWriter.seek(fileWriter.length);
@@ -153,6 +180,7 @@ function index() {
 
 }
 
+
 function play(ctx) {
 
     var lid = parseInt(ctx.params.id);
@@ -162,7 +190,7 @@ function play(ctx) {
     var app_section = document.getElementById('app_section');
     app_section.innerHTML = '';
 
-    window.resolveLocalFileSystemURL(cordova.file.dataDirectory + 'levels.json',
+    window.resolveLocalFileSystemURL(cordova.file.cacheDirectory + 'levels.json',
         function (fileEntry) {
             fileEntry.file(function (file) {
                 var reader = new FileReader();
@@ -244,18 +272,18 @@ function play(ctx) {
                 }
 
                 /*
-                var sector = 360/lv[lid].parts.length;
-                var angle = 0;
-                var radius = screen.width/4;
-                angle +=sector;
-                var tan = Math.tan(angle * Math.PI/180);
-                var inix = Math.sqrt(radius*radius/(tan+1));
-                var iniy = inix*tan;
-                alert('sector: ${sector} \n angle: ${angle} \n tan: ${tan} \n inix: ${inix} \n iniy: ${iniy}');
-                $('#'+element.id).css('position', 'absolute');
-                $('#'+element.id).css('top', iniy);
-                $('#'+element.id).css('left', inix);
-                */
+                 var sector = 360/lv[lid].parts.length;
+                 var angle = 0;
+                 var radius = screen.width/4;
+                 angle +=sector;
+                 var tan = Math.tan(angle * Math.PI/180);
+                 var inix = Math.sqrt(radius*radius/(tan+1));
+                 var iniy = inix*tan;
+                 alert('sector: ${sector} \n angle: ${angle} \n tan: ${tan} \n inix: ${inix} \n iniy: ${iniy}');
+                 $('#'+element.id).css('position', 'absolute');
+                 $('#'+element.id).css('top', iniy);
+                 $('#'+element.id).css('left', inix);
+                 */
                 $('#'+element.id).on('mouseup', function(e){
 
                     var x = santax + (element.x / window.devicePixelRatio);
@@ -301,5 +329,4 @@ function play(ctx) {
         }
 
     }
-
 }
