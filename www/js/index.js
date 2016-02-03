@@ -81,10 +81,41 @@ var app = {
                     var progress = 0;
                     var all_parts = 0;
                     levels.forEach(function(element,index){
-                        all_parts += element.parts.length;
+                        all_parts += element.parts.length+1;
                     });
                     var interval = 100/all_parts;
                     levels.forEach(function(element,index) {
+                        ImgCache.isCached(element.main.ref, function (path, success) {
+                            if (success) {
+                                console.log('already cached');
+                                progress += interval;
+                                progress_dialog.text('Загрузка кэша '+parseInt(progress)+'%');
+                                if(parseInt(progress) == 100){
+                                    document.getElementById('app_section').innerHTML = '' +
+                                        '<div id="splash"><img src="img/splash.png"></div>' +
+                                        '<div id="start-button"><a href="/index">Играть</a></div>';
+                                }
+                            }
+                            else {
+                                ImgCache.cacheFile(element.main.ref,
+                                    function () {
+                                        console.log('cached');
+                                        progress += interval;
+                                        progress_dialog.text('Загрузка кэша '+parseInt(progress)+'%');
+                                        if(parseInt(progress) ==100){
+                                            document.getElementById('app_section').innerHTML = '' +
+                                                '<div id="splash"><img src="img/splash.png"></div>' +
+                                                '<div id="start-button"><a href="/index">Играть</a></div>';
+                                        }
+                                    },
+                                    function () {
+                                        console.log('cache problem');
+                                        alert('Возникла проблема при кэшировании, провертье подключение к Интернету и перезапустите приложение');
+                                        return;
+                                    }
+                                );
+                            }
+                        });
                         element.parts.forEach(function(element,index) {
                             var i2 = index;
                             ImgCache.isCached(element.ref, function (path, success) {
@@ -210,26 +241,12 @@ function play(ctx) {
     function parseLevel(lv) {
         if (!lv) { alert('объект уровня null, что-то случилось при чтении файла'); page('/index');}
 
-        app_section.innerHTML += '<div class="parts" id="main" ><img src="' + lv[lid].main.ref + '" ></div>';
+        app_section.innerHTML += '<div class="parts" id="main" ><img src="' +
+            cordova.file.cacheDirectory + ImgCache.private.getCachedFilePath(lv[lid].main.ref)
+            + '" ></div>';
         lv[lid].parts.forEach(function (element) {
-            ImgCache.isCached(element.ref, function(path, success) {
-                if(success) {
-                    app_section.innerHTML += '<div class="draggable parts" id="' + element.id + '" >' +
-                        '<img src="' + cordova.file.cacheDirectory + ImgCache.private.getCachedFilePath(element.ref) + '"></div>';
-                }
-                else {
-                    ImgCache.cacheFile(element.ref,
-                        function () {
-                            app_section.innerHTML += '<div class="draggable parts" id="' + element.id + '" >' +
-                                '<img src="' + cordova.file.cacheDirectory + ImgCache.private.getCachedFilePath(element.ref) + '"></div>';
-                            //alert('done '+ImgCache.private.getCachedFileFullPath(element.ref));
-                        },
-                        function () {
-                            alert('cache problem')
-                        }
-                    );
-                }
-            });
+            app_section.innerHTML += '<div class="draggable parts" id="' + element.id + '" >' +
+                '<img src="' + cordova.file.cacheDirectory + ImgCache.private.getCachedFilePath(element.ref) + '"></div>';
         });
         setTimeout(function () {
 
@@ -311,7 +328,7 @@ function play(ctx) {
                     }
                 });
             });
-        }, 1000);
+        }, 10);
 
 
     }
