@@ -37,7 +37,7 @@ var app = {
         ImgCache.init();
 
         page.base('');
-        page('/index', index);
+        page('/index/:id', index);
         page('/play/:id', play);
         page();
         document.getElementById('app_section').innerHTML = '' +
@@ -50,24 +50,26 @@ var app = {
 
 
         var progress_dialog = $('#progress_dialog');
+        ImgCache.init(function(){
 
-        window.resolveLocalFileSystemURL(cordova.file.cacheDirectory+'levels.json',
-            function (fileEntry) {
-                cache_levels(fileEntry,progress_dialog);
-            },
-            function(){
-                var jTransfer = new FileTransfer();
-                jTransfer.download('http://pastebin.com/raw/cKPcFcpJ', cordova.file.cacheDirectory + 'levels.json',
-                    function (entry) {
-                        cache_levels(entry,progress_dialog);
-                    },
-                    function (error) {
-                        progress_dialog.text('JSON не загружен, проверьте подключение к Интернету и перезапустите приложение');
-                    },
-                    true
-                );
-            }
-        );
+            window.resolveLocalFileSystemURL(cordova.file.cacheDirectory+'levels.json',
+                function (fileEntry) {
+                    cache_levels(fileEntry,progress_dialog);
+                },
+                function(){
+                    var jTransfer = new FileTransfer();
+                    jTransfer.download('http://pastebin.com/raw/cKPcFcpJ', cordova.file.cacheDirectory + 'levels.json',
+                        function (entry) {
+                            cache_levels(entry,progress_dialog);
+                        },
+                        function (error) {
+                            progress_dialog.text('JSON не загружен, проверьте подключение к Интернету и перезапустите приложение');
+                        },
+                        true
+                    );
+                }
+            )
+        });
         //page.redirect('/index');
         function cache_levels(entry,progress_dialog){
             //var s = entry.nativeURL;
@@ -93,7 +95,7 @@ var app = {
                                 if(parseInt(progress) == 100){
                                     document.getElementById('app_section').innerHTML = '' +
                                         '<div id="splash"><img src="img/splash.png"></div>' +
-                                        '<div id="start-button"><a href="/index">Играть</a></div>';
+                                        '<div id="start-button"><a href="/index/0">Играть</a></div>';
                                 }
                             }
                             else {
@@ -105,7 +107,7 @@ var app = {
                                         if(parseInt(progress) ==100){
                                             document.getElementById('app_section').innerHTML = '' +
                                                 '<div id="splash"><img src="img/splash.png"></div>' +
-                                                '<div id="start-button"><a href="/index">Играть</a></div>';
+                                                '<div id="start-button"><a href="/index/0">Играть</a></div>';
                                         }
                                     },
                                     function () {
@@ -126,7 +128,7 @@ var app = {
                                     if(parseInt(progress) == 100){
                                         document.getElementById('app_section').innerHTML = '' +
                                             '<div id="splash"><img src="img/splash.png"></div>' +
-                                            '<div id="start-button"><a href="/index">Играть</a></div>';
+                                            '<div id="start-button"><a href="/index/0">Играть</a></div>';
                                     }
                                 }
                                 else {
@@ -138,7 +140,7 @@ var app = {
                                             if(parseInt(progress) ==100){
                                                 document.getElementById('app_section').innerHTML = '' +
                                                     '<div id="splash"><img src="img/splash.png"></div>' +
-                                                    '<div id="start-button"><a href="/index">Играть</a></div>';
+                                                    '<div id="start-button"><a href="/index/0">Играть</a></div>';
                                             }
                                         },
                                         function () {
@@ -160,7 +162,7 @@ var app = {
 };
 
 
-function index() {
+function index(ctx) {
     /*
      var db = openDatabase('Levels','1.0','Levels',10000);
      db.transaction(function (tx) {
@@ -177,12 +179,48 @@ function index() {
      });
      });
      */
+    var id = ctx.params.id;
     var app_section = document.getElementById('app_section');
     app_section.innerHTML = '';
+
+    window.resolveLocalFileSystemURL(cordova.file.applicationDirectory+'www/maps.json',
+        function (fileEntry) {
+            fileEntry.file(
+                function (file) {
+                    var reader = new FileReader();
+                    reader.onloadend = function (e) {
+                        console.log(this.result);
+                        var map = JSON.parse(this.result)[id];
+                        var heightRatio = screen.height/map.height;
+                        var widthRatio = screen.width/map.width;
+                        $('#app_section').append('<div id="map"><img src="'+cordova.file.applicationDirectory+'www/img/'+map.img+'"></div>');
+                        var map_el = document.getElementById('map');
+                        $('#map').css({
+                            width: map.width * widthRatio,
+                            height: map.height * widthRatio,
+                            top: 0,
+                            left:0
+                        });
+                        map.levels.forEach(function(element,index){
+                            $('#app_section').append('<a href="/play/'+index+'">' +
+                                '<div class="level_button" ' +
+                                'style="top:'+(element.y*widthRatio -10) +'px;' +
+                                'left:'+ (element.x*widthRatio - 10) +'px">'+(index+1)+'</div></a>');
+                        });
+                    };
+                    reader.readAsText(file);
+                },
+                function(){
+                    alert('Фон не найден');
+                }
+            );
+        }
+    );
+    /*
     for(var i = 0; i<2; i++) {
         app_section.innerHTML += '<div id="start-button"><a href="/play/' + i + '">Уровень '+i+'</a></div>';
     }
-    /*
+
      var fileTransfer = new FileTransfer();
      fileTransfer.download('http://freepacman.ru/images/play-game.png', cordova.file.cacheDirectory + 'start.png',
      function (entry) {
@@ -226,25 +264,29 @@ function play(ctx) {
             fileEntry.file(function (file) {
                 var reader = new FileReader();
                 reader.onloadend = function (e) {
-                    var level = JSON.parse(this.result);
-                    parseLevel(level);
+                    var levels = JSON.parse(this.result);
+                    if (levels[lid]!=null) {
+                        parseLevel(levels[lid]);
+                    }else {
+                        alert('Уровень с данным индексом не найден'); page('/index/0');
+                    }
                 };
                 reader.readAsText(file);
             })
         },
         function (e) {
             alert("ошибка файловой системы: " + e);
-            page('/index');
+            page('/index/0');
         }
     );
 
     function parseLevel(lv) {
-        if (!lv) { alert('объект уровня null, что-то случилось при чтении файла'); page('/index');}
+        //if (lv==null) { alert('объект уровня null, что-то случилось при чтении файла'); page('/index/0');}
 
         app_section.innerHTML += '<div class="parts" id="main" ><img src="' +
-            cordova.file.cacheDirectory + ImgCache.private.getCachedFilePath(lv[lid].main.ref)
+            cordova.file.cacheDirectory + ImgCache.private.getCachedFilePath(lv.main.ref)
             + '" ></div>';
-        lv[lid].parts.forEach(function (element) {
+        lv.parts.forEach(function (element) {
             app_section.innerHTML += '<div class="draggable parts" id="' + element.id + '" >' +
                 '<img src="' + cordova.file.cacheDirectory + ImgCache.private.getCachedFilePath(element.ref) + '"></div>';
         });
@@ -268,9 +310,9 @@ function play(ctx) {
             $('.draggable').draggable();
 
 
-            lv[lid].parts.forEach(function (element,index) {
-                var top_bar = Math.floor(lv[lid].parts.length/2)-1;
-                var bottom_bar = lv[lid].parts.length - top_bar;
+            lv.parts.forEach(function (element,index) {
+                var top_bar = Math.floor(lv.parts.length/2)-1;
+                var bottom_bar = lv.parts.length - top_bar;
 
                 var iniy,inix;
                 if(index<=top_bar){
@@ -289,7 +331,7 @@ function play(ctx) {
                 }
 
                 /*
-                 var sector = 360/lv[lid].parts.length;
+                 var sector = 360/lv.parts.length;
                  var angle = 0;
                  var radius = screen.width/4;
                  angle +=sector;
@@ -311,7 +353,7 @@ function play(ctx) {
                         $('#'+element.id).css('left', x);
                         $('#'+element.id).off('mouseup');
                         $('#'+element.id).draggable('destroy');
-                        check(lv[lid].parts.length);
+                        check(lv.parts.length);
                     }
                     else {
                         if(index<=top_bar){
@@ -328,7 +370,7 @@ function play(ctx) {
                     }
                 });
             });
-        }, 10);
+        }, 100);
 
 
     }
@@ -336,13 +378,11 @@ function play(ctx) {
         done++;
         if (done == n) {
             done = 0;
-            $('<div id="win">Уровень пройден!<p><a href="/index" >Вернуться в главное меню</a></p></div>')
+            $('<div id="win">Уровень пройден!<p><a href="/index/0" >Вернуться в главное меню</a></p></div>')
                 .appendTo('#app_section');
-            var win = document.getElementById('win');
-            var winh = win.offsetHeight;
-            var winw = win.offsetWidth;
-            win.setAttribute('style', 'display: block;position:absolute; z-index:111; top:' + ((screen.height / 2) - winh / 2) + 'px' +
-                '; left:' + ((screen.width / 2) - winw / 2) + 'px');
+            $('#win').css('top', screen.height/2);
+            $('#win').css('left', screen.width/4);
+
         }
 
     }

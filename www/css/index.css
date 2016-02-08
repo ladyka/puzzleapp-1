@@ -74,17 +74,36 @@ body {
     display: inline-block;
     position: absolute;
 }
-#win{
-    display: none;
+#map{
+    display: inline-block;
     position: absolute;
-    width: auto;
-    height: auto;
+}
+#map img{
+    width:100%;
+}
+.level_button{
+    position:absolute;
+    text-align:center;
+    background-color:#e5e6e7;
+    width:30px;
+    height:30px;
+    border: solid #2b81af 2px;
+    border-radius:50%;
+    vertical-align:middle;
+    font-size:25px;
+    color: #83888c;
+}
+
+#win{
+    padding-top: 20px;
+    position: absolute;
+    width: 50%;
     text-align: center;
-    background-color: #ced3d6;
-    border: #363636 solid 5px;
-    border-radius: 50px;
-    color:#363636;
-    font-size: 20px;
+    background-color: #e5e6e7;
+    border: solid #2b81af 2px;
+    border-radius: 10px;
+    color: #83888c;
+    font-size: 15px;
 }
 
 
