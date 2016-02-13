@@ -314,18 +314,22 @@ function play(ctx) {
 
                 var iniy,inix;
                 if(index<=top_bar){
-                    $('#'+element.id).css('position', 'absolute');
                     inix = (index)*screen.width/(top_bar+1)+(parseFloat($('#'+element.id).css('width'))/window.devicePixelRatio)/2;
-                    $('#'+element.id).css('left', inix );
                     iniy = santay/2 - (parseFloat($('#'+element.id).css('height'))/window.devicePixelRatio)/2;
-                    $('#'+element.id).css('top', iniy );
+                    $('#'+element.id).css({
+                        position: 'absolute',
+                        top: iniy,
+                        left: inix
+                    });
                 }
                 else {
-                    $('#'+element.id).css('position', 'absolute');
                     inix = (index-top_bar)*screen.width/bottom_bar-(parseFloat($('#'+element.id).css('width'))/window.devicePixelRatio)/2;
-                    $('#'+element.id).css('left', inix );
                     iniy =santay + santah+(screen.height- santay - santah)/2 - (parseFloat($('#'+element.id).css('height'))/window.devicePixelRatio)/2;
-                    $('#'+element.id).css('top', iniy );
+                    $('#'+element.id).css({
+                        position: 'absolute',
+                        top: iniy,
+                        left: inix
+                    });
                 }
 
                 /*
@@ -343,26 +347,33 @@ function play(ctx) {
                  */
                 $('#'+element.id).on('mouseup', function(e){
 
+                    var range = 30;
                     var x = santax + (element.x / window.devicePixelRatio);
                     var y = santay + (element.y / window.devicePixelRatio);
-                    if (e.target.x > (x - 100) && e.target.x < (x + 100) && e.target.y > (y - 100) && e.target.y < (y + 100)) {
-                        $('#'+element.id).css('position', 'absolute');
-                        $('#'+element.id).css('top', y);
-                        $('#'+element.id).css('left', x);
+                    if (e.target.x > (x - range) && e.target.x < (x + range) && e.target.y > (y - range) && e.target.y < (y + range)) {
+                        $('#'+element.id).css({
+                            position: 'absolute',
+                            top: y,
+                            left: x
+                        });
                         $('#'+element.id).off('mouseup');
                         $('#'+element.id).draggable('destroy');
-                        check(lv.parts.length);
+                        check(lv.parts.length, lv.id);
                     }
                     else {
                         if(index<=top_bar){
-                            $('#'+element.id).css('position', 'absolute');
-                            $('#'+element.id).css('left', inix );
-                            $('#'+element.id).css('top', iniy );
+                            $('#'+element.id).css({
+                                position: 'absolute',
+                                left: inix,
+                                top: iniy
+                            })
                         }
                         else {
-                            $('#'+element.id).css('position', 'absolute');
-                            $('#'+element.id).css('left', inix );
-                            $('#'+element.id).css('top', iniy );
+                            $('#'+element.id).css({
+                                position: 'absolute',
+                                left: inix,
+                                top: iniy
+                            })
                         }
 
                     }
@@ -372,11 +383,13 @@ function play(ctx) {
 
 
     }
-    function check(n) {
+    function check(n, id) {
         done++;
         if (done == n) {
             done = 0;
-            $('<div id="win">Уровень пройден!<p><a href="/index/0" >Вернуться в главное меню</a></p></div>')
+            $('<div id="win">Уровень пройден!' +
+                '<p><a href="/play/'+id+'" >Следующий уровень</a></p>'+
+                '<p><a href="/index/0" >Вернуться в главное меню</a></p></div>')
                 .appendTo('#app_section');
             $('#win').css('top', screen.height/2);
             $('#win').css('left', screen.width/4);
