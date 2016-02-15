@@ -42,9 +42,10 @@ body {
     padding-top: 50px;
 }
 #splash{
+    margin:20px;
 }
 #splash img{
-    width: 25%;
+    width: 15%;
 }
 #progress_dialog{
     padding: 20px;

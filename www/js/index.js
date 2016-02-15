@@ -193,16 +193,17 @@ function index(ctx) {
                         var widthRatio = screen.width/map.width;
                         $('#app_section').append('<div id="map"><img src="'+cordova.file.applicationDirectory+'www/img/'+map.img+'"></div>');
                         var map_el = document.getElementById('map');
+
                         $('#map').css({
                             width: map.width * widthRatio,
                             height: map.height * widthRatio,
-                            top: 0,
-                            left:0
+                            top: screen.height/2 - map.height/2,
+                            left: 0
                         });
                         map.levels.forEach(function(element,index){
                             $('#app_section').append('<a href="/play/'+index+'">' +
                                 '<div class="level_button" ' +
-                                'style="top:'+(element.y*widthRatio -10) +'px;' +
+                                'style="top:'+  ((screen.height/2 - map.height/2+element.y)*widthRatio -10) +'px;' +
                                 'left:'+ (element.x*widthRatio - 10) +'px">'+(index+1)+'</div></a>');
                         });
                     };
@@ -302,7 +303,7 @@ function play(ctx) {
             $('#app_section').css('display', 'block');
             $('.parts img').css({
                 width: function (index, value) {
-                    return parseFloat(value) / window.devicePixelRatio;
+                    return parseFloat(value) / window.devicePixelRatio*1.2;
                 }
             });
             $('.draggable').draggable();
@@ -314,7 +315,7 @@ function play(ctx) {
 
                 var iniy,inix;
                 if(index<=top_bar){
-                    inix = (index)*screen.width/(top_bar+1)+(parseFloat($('#'+element.id).css('width'))/window.devicePixelRatio)/2;
+                    inix = (index)*screen.width/(top_bar+1)+screen.width/(top_bar+1)/2 -parseFloat($('#'+element.id).css('width'))/2;
                     iniy = santay/2 - (parseFloat($('#'+element.id).css('height'))/window.devicePixelRatio)/2;
                     $('#'+element.id).css({
                         position: 'absolute',
@@ -323,8 +324,8 @@ function play(ctx) {
                     });
                 }
                 else {
-                    inix = (index-top_bar)*screen.width/bottom_bar-(parseFloat($('#'+element.id).css('width'))/window.devicePixelRatio)/2;
-                    iniy =santay + santah+(screen.height- santay - santah)/2 - (parseFloat($('#'+element.id).css('height'))/window.devicePixelRatio)/2;
+                    inix = (index-top_bar-1)*screen.width/(bottom_bar-1)+screen.width/(bottom_bar-1)/2-(parseFloat($('#'+element.id).css('width'))/window.devicePixelRatio)/2;
+                    iniy =screen.height - parseFloat($('#'+element.id).css('height')) - parseFloat($('#'+element.id).css('height'))/window.devicePixelRatio/2;
                     $('#'+element.id).css({
                         position: 'absolute',
                         top: iniy,
@@ -348,8 +349,8 @@ function play(ctx) {
                 $('#'+element.id).on('mouseup', function(e){
 
                     var range = 30;
-                    var x = santax + (element.x / window.devicePixelRatio);
-                    var y = santay + (element.y / window.devicePixelRatio);
+                    var x = (santax + (element.x / window.devicePixelRatio*1.2));
+                    var y = (santay + (element.y / window.devicePixelRatio*1.2)) ;
                     if (e.target.x > (x - range) && e.target.x < (x + range) && e.target.y > (y - range) && e.target.y < (y + range)) {
                         $('#'+element.id).css({
                             position: 'absolute',
