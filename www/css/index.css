@@ -107,6 +107,14 @@ body {
     font-size: 15px;
 }
 
+#win_buttons{
+    text-align: center;
+}
+#win_buttons img{
+    padding: 10px;
+    width: 30%;
+}
+
 
 
 /* Landscape layout (with min-width) */

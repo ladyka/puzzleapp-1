@@ -389,8 +389,9 @@ function play(ctx) {
         if (done == n) {
             done = 0;
             $('<div id="win">Уровень пройден!' +
-                '<p><a href="/play/'+id+'" >Следующий уровень</a></p>'+
-                '<p><a href="/index/0" >Вернуться в главное меню</a></p></div>')
+                    '<div id="win_buttons">' +
+                '<a href="/index/0"><img src="'+cordova.file.applicationDirectory+'www/img/ButtonBack.png'+'"></a>' +
+                '<a href="/play/'+id+'"><img src="'+cordova.file.applicationDirectory+'www/img/ButtonActive.png'+'"></a></div>')
                 .appendTo('#app_section');
             $('#win').css('top', screen.height/2);
             $('#win').css('left', screen.width/4);
